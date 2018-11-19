@@ -2,6 +2,8 @@
 from __future__ import unicode_literals
 from lxml import html
 from unidecode import unidecode
+from tinydb import TinyDB, Query
+
 import requests
 import sys
 import re
@@ -10,7 +12,7 @@ PREFIX_URL = 'https://agendatrad.org/'
 contactList = []
 
 urlTab = {}
-def getPageListDetails(url):
+def getPageListDetails(url, database):
     page = requests.get(PREFIX_URL+url)
     tree = html.fromstring(page.content)
     href = tree.xpath('//a/@href')
@@ -20,10 +22,10 @@ def getPageListDetails(url):
     for item in href:
         print(item)
         if item.startswith('/orga_association/') or item.startswith('/orga_autre/'):
-            getOrgaDetails(item)
+            getOrgaDetails(item, database)
 
 
-def getOrgaDetails(url):
+def getOrgaDetails(url, database):
     newContact = {}
     page = requests.get(PREFIX_URL+url)
     tree = html.fromstring(page.content)
@@ -60,6 +62,9 @@ def getOrgaDetails(url):
     newContact['last-event-date'] = contact_tree.xpath('//*[contains(@class, "date_head")]/text()')
     if len(newContact['last-event-date']) != 0:
         contactList.append(newContact)
+        Orga = Query()
+        if len(database.search(Orga.name == newContact['name'])) == 0:
+            database.insert(newContact)
     # displayContact(newContact)
 
 def displayContact(item):
@@ -80,9 +85,11 @@ def display(contactList):
 
 
 def main():
+    db = TinyDB('db/database.json')
+    table = db.table('Orga')
     for i in range(1, 2):
         # print('--'+str(i)+'--')
-        getPageListDetails('organisateurs/France?page='+str(i))
+        getPageListDetails('organisateurs/France?page='+str(i), table)
     display(contactList)
 
 if __name__ == "__main__":
