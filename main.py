@@ -64,6 +64,12 @@ def displayContact(item):
         print item['last-event-date'][0]
     if item.has_key('mail-address'):
         print item['mail-address']
+def displayAllMail(database):
+    Orga = Query()
+    result = []
+    for item in database.search(Orga['mail-address'].exists()):
+        result = result + item['mail-address']
+    print list(set(result))
 
 def getAllMail(database):
     Orga = Query()
@@ -75,13 +81,14 @@ def getAllMail(database):
             print addressMailLit
 
 def main():
-    # 
+    #
     db = TinyDB('db/database.json')
     table = db.table('Orga')
 
-    for i in range(1, 23):
-        getPageListDetails('organisateurs/France?page='+str(i), table)
-    getAllMail(table)
+    # for i in range(3, 23):
+    #     getPageListDetails('organisateurs/France?page='+str(i), table)
+    displayAllMail(table)
+    # getAllMail(table)
 
 if __name__ == "__main__":
     main()
