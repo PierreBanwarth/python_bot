@@ -28,10 +28,11 @@ def getOrgaDetails(url, database):
     tree = html.fromstring(page.content)
 
     newContact['name'] = tree.xpath('//h2[@class="entitie_name rouge"]/text()')[0]
-    newContact['street-adress'] = tree.xpath('//span[@itemprop="street-address"]/text()')[0]
-    newContact['postal-code'] =tree.xpath('//span[@itemprop="postal-code"]/text()')[0]
-    newContact['locality'] = tree.xpath('//span[@itemprop="locality"]/text()')[0]
-    newContact['country-name'] = tree.xpath('//span[@itemprop="country-name"]/text()')[0]
+    streetAddress = tree.xpath('//span[@itemprop="street-address"]/text()')[0]
+    postalCode = tree.xpath('//span[@itemprop="postal-code"]/text()')[0]
+    locality = tree.xpath('//span[@itemprop="locality"]/text()')[0]
+    countryName = tree.xpath('//span[@itemprop="country-name"]/text()')[0]
+    newContact['address'] = streetAddress +' '+ locality +' '+ postalCode +' '+ countryName
     # Verification du site de l'asso
     test = tree.xpath('//a[@class="btn btn-small"]/@href')
     if len(test)>0:
@@ -64,13 +65,14 @@ def displayContact(item):
         print item['last-event-date'][0]
     if item.has_key('mail-address'):
         print item['mail-address']
+
 def displayAllMail(database):
     Orga = Query()
     result = []
     for item in database.search(Orga['mail-address'].exists()):
         result = result + item['mail-address']
     print list(set(result))
-
+    print len(result)
 def getAllMail(database):
     Orga = Query()
     for item in database.search(Orga.website.exists()):
@@ -88,7 +90,7 @@ def main():
     # for i in range(3, 23):
     #     getPageListDetails('organisateurs/France?page='+str(i), table)
     displayAllMail(table)
-    # getAllMail(table)
+    getAllMail(table)
 
 if __name__ == "__main__":
     main()
