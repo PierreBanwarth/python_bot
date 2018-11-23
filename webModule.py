@@ -16,9 +16,13 @@ import re
 
 
 def getAllLinks(url):
-    page = requests.get(url)
-    tree = html.fromstring(page.content)
-    href = tree.xpath('//a/@href')
+    href = []
+    try:
+        page = requests.get(url)
+        tree = html.fromstring(page.content)
+        href = tree.xpath('//a/@href')
+    except:
+        pass
     return list(set(href))
 
 def getMailTabFromWebsite(url):
@@ -40,7 +44,7 @@ def getMailTabFromWebsite(url):
                     adressMailList.append(email)
     except:
         pass
-    return adressMailList + crawlWebPage(url)
+    return list(set(adressMailList +url))
 
 def crawlWebPage(url):
     # a queue of urls to be crawled

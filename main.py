@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from lxml import html
 from unidecode import unidecode
 from tinydb import TinyDB, Query
+from email_validator import validate_email, EmailNotValidError
 
 import requests
 import sys
@@ -21,6 +22,17 @@ def getPageListDetails(url, database):
         if item.startswith('/orga_association/') or item.startswith('/orga_autre/'):
             getOrgaDetails(item, database)
 
+def validateMailList(listString):
+    result = []
+    for item in listString:
+        try:
+            v = validate_email(item) # validate and get info
+            email = v["email"] # replace with normalized form
+            print email 
+            result.append(email)
+        except EmailNotValidError as e:
+            pass
+    return result
 
 def getOrgaDetails(url, database):
     newContact = {}
@@ -38,8 +50,10 @@ def getOrgaDetails(url, database):
     if len(test)>0:
         newContact['website'] = test[0]
         # Verification de l'adresse mail*
-        addressMailLit = webModule.getMailTabFromWebsite(newContact['website'])
-        newContact['mail-address'] = addressMailLit
+        addressMailList = webModule.getMailTabFromWebsite(newContact['website'])
+        validatedAddresseMailList = validateMailList(addressMailList)
+
+        newContact['mail-address'] = validatedAddresseMailList
     # Verification des anciennes dates
     contact_url = PREFIX_URL+url[:-5]+'/oldEvent.html'
     page_contact = requests.get(contact_url)
@@ -73,24 +87,26 @@ def displayAllMail(database):
         result = result + item['mail-address']
     print list(set(result))
     print len(result)
-def getAllMail(database):
+    return result
+
+def getAllMail(mailList, database):
     Orga = Query()
     for item in database.search(Orga.website.exists()):
         href = webModule.getAllLinks(item['website'])
-        print(href)
         for link in href:
-            addressMailLit = webModule.getMailTabFromWebsite(link)
-            print addressMailLit
+            addressMailList = webModule.getMailTabFromWebsite(link)
+            mailList = mailList + validateMailList(addressMailList)
+    return mailList
 
 def main():
     #
     db = TinyDB('db/database.json')
     table = db.table('Orga')
 
-    # for i in range(3, 23):
+    # for i in range(1, 23):
     #     getPageListDetails('organisateurs/France?page='+str(i), table)
-    displayAllMail(table)
-    getAllMail(table)
+    mailList = displayAllMail(table)
+    getAllMail(mailList, table)
 
 if __name__ == "__main__":
     main()
