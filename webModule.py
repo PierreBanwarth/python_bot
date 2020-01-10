@@ -47,6 +47,6 @@ def getMailTabFromWebsite(url):
             results = [match.group(0) for token in _emailtokens for match in [re.search(r"([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)", str(token.strip()))] if match]
             for item in results:
                 if validate_email(item):
-                    if item.endswith('.com') or item.endswith('.org') or item.endswith('.eu') or item.endswith('.bzh') or item.endswith('.fr'):
+                    if 'wix' not in item and (item.endswith('.com') or item.endswith('.org') or item.endswith('.eu') or item.endswith('.bzh') or item.endswith('.fr')):
                         finalMailing.append(item)
-    return finalMailing
+    return  list(set(finalMailing))

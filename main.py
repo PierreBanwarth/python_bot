@@ -5,7 +5,7 @@ from unidecode import unidecode
 from tinydb import TinyDB, Query
 from email_validator import validate_email, EmailNotValidError
 from validate_email import validate_email
-
+from organisation import Organisation
 import requests
 import sys
 import re
@@ -13,27 +13,17 @@ import webModule
 import io
 
 AGENDA_TRAD_PREFIX_URL = 'https://agendatrad.org/'
+TAMM_KREIZ_PREFIX_URL = 'https://www.tamm-kreiz.bzh'
+TAMM_KREIZ_POSTFIX_URL_LIST = ['/liste-lettre/15/1','/liste-lettre/15/A','/liste-lettre/15/B','/liste-lettre/15/C','/liste-lettre/15/D','/liste-lettre/15/E','/liste-lettre/15/F','/liste-lettre/15/G','/liste-lettre/15/H','/liste-lettre/15/I','/liste-lettre/15/J','/liste-lettre/15/K','/liste-lettre/15/L','/liste-lettre/15/M','/liste-lettre/15/N','/liste-lettre/15/O','/liste-lettre/15/P','/liste-lettre/15/Q','/liste-lettre/15/R','/liste-lettre/15/S','/liste-lettre/15/T','/liste-lettre/15/U','/liste-lettre/15/V','/liste-lettre/15/W','/liste-lettre/15/X','/liste-lettre/15/Y','/liste-lettre/15/Z']
 contactList = []
 
 urlTab = {}
 
-def getPageListDetails(url, database, urlList):
+def getAgendaTradPageListDetails(url, database, urlList):
     href = webModule.getAllLinks(AGENDA_TRAD_PREFIX_URL+url)
     for item in href:
         if item.startswith('/orga_association/') or item.startswith('/orga_autre/'):
             getOrgaDetailsAgendaTrad(item, database,urlList)
-
-def validateMailList(listString):
-
-    result = []
-    for item in listString:
-        try:
-            v = validate_email(item) # validate and get info
-            email = v["email"] # replace with normalized form
-            result.append(email)
-        except EmailNotValidError as e:
-            pass
-    return result
 
 def getOrgaAddress(tree):
     streetAddress = tree.xpath('//span[@itemprop="street-address"]/text()')[0]
@@ -59,54 +49,37 @@ def getOrgaDetailsAgendaTrad(url, database, urlList):
 
         page = requests.get(newUrl['address'])
         tree = html.fromstring(page.content)
-        newContact['source'] = 'agendaTrad'
-        newContact['name'] = tree.xpath('//h2[@class="entitie_name rouge"]/text()')[0]
-
-        newContact['address'] = getOrgaAddress(tree)
+        newContact = Organisation()
+        # newContact['source'] = 'agendaTrad'
+        organisation.setSource('agendaTrad')
+        organisation.setName(tree.xpath('//h2[@class="entitie_name rouge"]/text()')[0])
+        organisation.setAddress(getOrgaAddress(tree))
+        # newContact['address'] = getOrgaAddress(tree)
         # Verification du site de l'asso
-
         addressMailList = webModule.getMailTabFromWebsite(newUrl['address'][:-5] + '/contact.html')
         print(addressMailList)
         isThereAWebsite = tree.xpath('//a[@class="btn btn-small"]/@href')
 
         if len(isThereAWebsite)>0:
             if 'https://www.facebook.com/' in isThereAWebsite[0]:
-                newContact['facebookPages'] = isThereAWebsite[0]
+                organisation.setFacebook(isThereAWebsite[0])
+                # newContact['facebookPages'] =
             else:
-                newContact['website'] = isThereAWebsite[0]
-                addressMailList = webModule.searchForMailInWebsite(newContact['website'])
-                newContact['mail-address'] = list(set(addressMailList))
+                organisation.setWebsite(isThereAWebsite[0])
+                organisation.setMail(webModule.searchForMailInWebsite(organisation.getWebsite()))
+
         if len(getOrgaOldDates(tree, newUrl['address']))>0:
-            newContact['last-event-date'] = getOrgaOldDates(tree, newUrl['address'])[0]
+            organisation.setLastEventDate(getOrgaOldDates(tree, newUrl['address'])[0])
         else:
             newContact['last-event-date'] = 'none'
         # Adding organisation to database if she has already make some events
 
-        if len(newContact['last-event-date']) != 0:
+        if organisation.hasDoneConcert():
             contactList.append(newContact)
             Orga = Query()
-            if len(database.search(Orga.name == newContact['name'])) == 0:
-                database.insert(newContact)
-                displayOrga(newContact)
-
-
-def displayOrga(orga):
-    print('========================================')
-    print('Name : ' + orga['name'])
-    print('From : ' + orga['source'])
-    print('Address : ' + orga['address'])
-    if 'last-event-date' in orga:
-        print('Last event date : ')
-    print('----------------------------------------')
-    if 'website' in orga:
-        print('Web : ' + orga['website'])
-    if 'facebookPages' in orga:
-        print('Facebook : ' + orga['facebookPages'])
-    print('----------------------------------------')
-    if 'mail-address' in orga:
-        for item in orga['mail-address']:
-            print(item)
-    print('========================================')
+            if len(database.search(Orga.name == organisation.getName())) == 0:
+                database.insert(organisation.toDict())
+                organisation.display()
 
 def displayAllMail(database):
     Orga = Query()
@@ -119,18 +92,9 @@ def displayAllMail(database):
         if validate_email(item):
             finalMailing.append(item)
     unic = []
-    # for item in database.search(Orga['mail-address'].exists()):
-        # for mail in item['mail-address']:
-        #     if 'wix' not in mail and not mail in unic:
-        #         print(item['name'] + '   ' +mail)
-        #         unic.append(mail)
     for item in database.search(Orga['facebookPages'].exists()):
         print(item['facebookPages'])
-    # print(result)
-    # print(len(result))
-    #
-    # print(finalMailing)
-    # print(len(finalMailing))
+
 
     expression = re.compile(r'\.[a-zA-Z]*')
     extension = {}
@@ -145,27 +109,69 @@ def displayAllMail(database):
 
     return result
 
-def getAllMail(mailList, database):
-    Orga = Query()
-    for item in database.search(Orga.website.exists()):
-        href = webModule.getAllLinks(item['website'])
-        for link in href:
 
-            addressMailList = webModule.getMailTabFromWebsite(link)
-            print(addressMailList)
+def parseAgendaTrad(orga, urlExplored):
+    for i in range(1, 27):
+        getAgendaTradPageListDetails('organisateurs/France?page='+str(i), table, url)
 
-    return mailList
+def getAnnuaireTammKreizhUrlList():
+    links = []
+    for item in TAMM_KREIZ_POSTFIX_URL_LIST:
+        for link in webModule.getAllLinks(TAMM_KREIZ_PREFIX_URL+item):
+            if '/annuaire_entree' in link:
+                links.append(link)
+    return list(set(links))
 
+def parseTammKreizh(orgaDatabase, urlExplored):
+    links = getAnnuaireTammKreizhUrlList()
+    for link in links:
+            # searching for all : listingitemitemtitleaddress
+        urlToExplore = TAMM_KREIZ_PREFIX_URL+link
+        urlDatabaseQuery = Query()
+        newUrl = {}
+        if len(urlExplored.search(urlDatabaseQuery.address == link)) == 0:
+            newUrl['address'] = link
+            urlExplored.insert(newUrl)
+            page = requests.get(urlToExplore)
+            tree = html.fromstring(page.content)
+            test = tree.xpath('//ul[@class="listingitemitemtitleaddress"]/li/text()')
+            orga = Organisation()
+            orga.setSource(TAMM_KREIZ_PREFIX_URL)
+            orga.setName(link)
+            for item in test:
+                item = item.replace("\n","")
+                item = item.replace("\t","")
+                pattern = re.compile('[@_!#$%^&*()<>?/\|}{~:]')
+                if pattern.search(item) != None:
+                    orga.addMail(item)
+                if item.startswith('0'):
+                    orga.setPhoneNumber(item)
+            website = tree.xpath('//a[@class="listingitemitemtitleaddress circle-chevron-arrow"]/@href')
+            for item in website:
+                if 'facebook' in item:
+                    orga.setFacebook(item)
+                else:
+                    orga.setWebsite(item)
+                    orga.setMail(webModule.searchForMailInWebsite(orga.getWebsite()))
+            Orga = Query()
+            if len(orgaDatabase.search(Orga.name == orga.getName())) == 0:
+                orgaDatabase.insert(orga.toDict())
+            orga.display()
 def main():
     #
-    db = TinyDB('db/database.json')
-    table = db.table('Orga')
-    url = db.table('website')
+    dbAgendaTrad = TinyDB('db/databaseAgendaTrad.json')
+    OrgaAgendaTrad = dbAgendaTrad.table('Orga')
+    urlExploredAgendaTrad = dbAgendaTrad.table('website')
 
-    for i in range(1, 27):
-        getPageListDetails('organisateurs/France?page='+str(i), table, url)
-    mailList = displayAllMail(table)
-    # getAllMail(mailList, table)
+    dbTammKreizh = TinyDB('db/databaseTammKreizh.json')
+    OrgaTammKreizh = dbTammKreizh.table('Orga')
+    urlExploredTammKreizh = dbTammKreizh.table('website')
+
+    # parseAgendaTrad(OrgaAgendaTrad, urlExploredAgendaTrad)
+
+    parseTammKreizh(OrgaTammKreizh, urlExploredTammKreizh)
+    # mailList = displayAllMail(OrgaAgendaTrad)
+
 
 if __name__ == "__main__":
     main()
