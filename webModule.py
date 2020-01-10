@@ -1,16 +1,15 @@
 # coding: utf-8
 import requests
-import urllib
+import urllib3
 from lxml import html
-from urllib import urlopen
 
 import nltk
 from bs4 import BeautifulSoup
 import requests
 import requests.exceptions
-from urlparse import urlsplit
 from collections import deque
 import re
+from validate_email import validate_email
 
 
 
@@ -25,39 +24,29 @@ def getAllLinks(url):
         pass
     return list(set(href))
 
+def searchForMailInWebsite(url):
+    finalResult = []
+    for item in getAllLinks(url):
+        if url in item:
+            finalResult += getMailTabFromWebsite(item)
+    return finalResult
+
 def getMailTabFromWebsite(url):
-    adressMailList = []
-    return crawlWebPage(url)
-    try:
-
-        newContactWebsite = requests.get(url)
-        contactWebsiteTree = html.fromstring(newContactWebsite.content)
-
-        getMailTab = contactWebsiteTree.xpath('//*[contains(text(),"@")]/text()')
-        print getMailTab
-        for text in getMailTab:
-            emails = re.findall(r'[\w\.-]+@[\w\.-]+', text)
-            for email in emails:
-
-                if email.endswith('.com') or email.endswith('.fr') or email.endswith('.net'):
-                    print email
-                    adressMailList.append(email)
-    except:
-        pass
-    return list(set(adressMailList +url))
-
-def crawlWebPage(url):
+    finalMailing = []
     # a queue of urls to be crawled
-    try:
-        new_emails = []
-        # extract base url to resolve relative links
-        parts = urlsplit(url)
-        base_url = "{0.scheme}://{0.netloc}".format(parts)
-        path = url[:url.rfind('/')+1] if '/' in parts.path else url
-        response = requests.get(url)
-        new_emails = re.findall(r"[a-z0-9\.\-+_]+@[a-z0-9\.\-+_]+\.[a-z]+", response.text, re.I)
-
-    except:
-        # ignore pages with errors
-        pass
-    return new_emails
+    if not 'mailto' in url:
+        response = requests.get(
+            url,
+            headers={'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.107 Safari/537.36','Upgrade-Insecure-Requests': '1', 'x-runtime': '148ms'},
+            allow_redirects=True
+        ).content
+        soup = BeautifulSoup(response, "html.parser")
+        email = soup(text=re.compile(r'[A-Za-z0-9\.\+_-]+@[A-Za-z0-9\._-]+\.[a-zA-Z]*'))
+        _emailtokens = str(email).replace("\\t", "").replace("\\n", "").split(' ')
+        if len(_emailtokens):
+            results = [match.group(0) for token in _emailtokens for match in [re.search(r"([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)", str(token.strip()))] if match]
+            for item in results:
+                if validate_email(item):
+                    if item.endswith('.com') or item.endswith('.org') or item.endswith('.eu') or item.endswith('.bzh') or item.endswith('.fr'):
+                        finalMailing.append(item)
+    return finalMailing
