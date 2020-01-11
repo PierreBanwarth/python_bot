@@ -81,33 +81,34 @@ def getOrgaDetailsAgendaTrad(url, database, urlList):
                 database.insert(organisation.toDict())
                 organisation.display()
 
-def displayAllMail(database):
+def getAllMail(database):
     Orga = Query()
-    result = []
-    finalMailing = []
+    result =  []
     for item in database.search(Orga['mail-address'].exists()):
         result = result + item['mail-address']
-    result = list(set(result))
-    for item in result:
-        if validate_email(item):
-            finalMailing.append(item)
-    unic = []
-    for item in database.search(Orga['facebookPages'].exists()):
-        print(item['facebookPages'])
+    return list(set(result))
 
-
-    expression = re.compile(r'\.[a-zA-Z]*')
-    extension = {}
-    for item in finalMailing:
-        extension_occurence = expression.findall(item)
-        if not extension_occurence[len(extension_occurence)-1] in extension:
-            extension[extension_occurence[len(extension_occurence)-1]] = 1
+def displayAllMail(databaseTK, databaseAT):
+    mailAT = getAllMail(databaseAT)
+    mailTK = getAllMail(databaseTK)
+    print(mailAT)
+    print(mailTK)
+    mailInTkAndInAT = 0
+    newMail = 0
+    doublons = []
+    newMails = []
+    for item in mailTK:
+        item = item.replace('\r',"")
+        if item in mailAT:
+            mailInTkAndInAT = mailInTkAndInAT + 1
+            doublons.append(item)
         else:
-            extension[extension_occurence[len(extension_occurence)-1]] = extension[extension_occurence[len(extension_occurence)-1]] +1
-
-    # print(sorted(extension.items(), key=lambda x: x[1], reverse=True))
-
-    return result
+            newMails.append(item)
+            newMail = newMail + 1
+    percentageDoublon = (mailInTkAndInAT * 100)/len(mailTK)
+    print('Nouveaux Emails = ' + str(newMail))
+    print('Doublons = ' + str(mailInTkAndInAT))
+    print('Pourcentage de doublons : ' + str(percentageDoublon))
 
 
 def parseAgendaTrad(orga, urlExplored):
@@ -137,10 +138,12 @@ def parseTammKreizh(orgaDatabase, urlExplored):
             test = tree.xpath('//ul[@class="listingitemitemtitleaddress"]/li/text()')
             orga = Organisation()
             orga.setSource(TAMM_KREIZ_PREFIX_URL)
-            orga.setName(link)
+            nameTest = tree.xpath('//header[@class="introblock listingitemintro"]/h1/text()')
+            orga.setName(nameTest[0])
             for item in test:
                 item = item.replace("\n","")
                 item = item.replace("\t","")
+                item = item.replace("\r","")
                 pattern = re.compile('[@_!#$%^&*()<>?/\|}{~:]')
                 if pattern.search(item) != None:
                     orga.addMail(item)
@@ -171,7 +174,7 @@ def main():
 
     parseTammKreizh(OrgaTammKreizh, urlExploredTammKreizh)
     # mailList = displayAllMail(OrgaAgendaTrad)
-
+    displayAllMail(OrgaTammKreizh, OrgaAgendaTrad)
 
 if __name__ == "__main__":
     main()
