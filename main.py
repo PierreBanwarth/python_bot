@@ -269,7 +269,7 @@ def main():
     urlExploredTammKreizh = dbTammKreizh.table('website')
 
     if(len(sys.argv) > 1):
-        if sys.argv == 2:
+        if len(sys.argv) == 2:
             if sys.argv[1] == '-h' or sys.argv[1] == '--help':
                 displayHelp()
                 sys.exit(0)
@@ -280,6 +280,9 @@ def main():
                 cleanDB(dbAgendaTrad)
             elif sys.argv[1] == '-rtk':
                 cleanDB(dbTammKreizh)
+            else:
+                displayHelp()
+                exit(0)
 
     parseAgendaTrad(OrgaAgendaTrad, urlExploredAgendaTrad)
     parseTammKreizh(OrgaTammKreizh, urlExploredTammKreizh)

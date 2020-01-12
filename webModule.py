@@ -11,11 +11,14 @@ def getAllLinks(url):
     href = []
     try:
         page = requests.get(url)
-        tree = html.fromstring(page.content)
-        href = tree.xpath('//a/@href')
+        if page:
+            tree = html.fromstring(page.content)
+            href = tree.xpath('//a/@href')
+            return list(set(href))
+    except requests.exceptions.RequestException as e:
+        print(e)
         return list(set(href))
     except requests.exceptions.RequestException as e:
-        # This is the correct syntax
         print(e)
         return list(set(href))
 
