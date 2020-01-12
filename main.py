@@ -165,7 +165,7 @@ def displayAllMail(databaseTK, databaseAT):
     percentageDoublon = (mailInTkAndInAT * 100)/len(mailTK)
     print("================================================")
     print("Emails from Tamm Kreizh : " + str(len(mailTK)))
-    print("Emails from Agenda Trad : " + str(len(mailTK)))
+    print("Emails from Agenda Trad : " + str(len(mailAT)))
     print('Doublons = ' + str(mailInTkAndInAT))
     print('Pourcentage de doublons : ' + str(percentageDoublon))
 
