@@ -15,6 +15,8 @@ def getAllLinks(url):
             tree = html.fromstring(page.content)
             href = tree.xpath('//a/@href')
             return list(set(href))
+        else:
+            return []
     except requests.exceptions.RequestException as e:
         print(e)
         return list(set(href))
@@ -46,7 +48,7 @@ def getMailTabFromWebsite(url):
         string = str(email)
         curedString = string.replace("\\t", "")
         curedString = curedString.replace("\\n", "")
-        curedString = curedString.replace("\\n", "")
+        curedString = curedString.replace("\\r", "")
         _emailtokens = curedString.split(' ')
         if len(_emailtokens):
             results = [
@@ -58,6 +60,10 @@ def getMailTabFromWebsite(url):
                 ] if match
             ]
             for item in results:
+                print('=========Email=============')
+                print(item)
+                print('============================')
+
                 if validate_email(item):
                     if (
                         'wix' not in item and

@@ -105,7 +105,6 @@ def getOrgaDetailsAgendaTrad(url, database, urlList):
         addressMailList = webModule.getMailTabFromWebsite(
             newUrl['address'][:-5] + '/contact.html'
         )
-        print(addressMailList)
         isThereAWebsite = tree.xpath('//a[@class="btn btn-small"]/@href')
 
         if len(isThereAWebsite) > 0:

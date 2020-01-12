@@ -60,7 +60,7 @@ class Organisation:
             print('address : ' + self.address)
         if 'not found' not in self.facebookPages:
             print('facebook : ' + self.facebookPages)
-        if len(self.mailAddress) > 0:
+        if len(self.mailAddress):
             for item in self.mailAddress:
                 print('mail : ' + item)
         if 'not found' not in self.website:
