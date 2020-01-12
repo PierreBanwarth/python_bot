@@ -26,4 +26,6 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: run
       run: |
-        python main.py
+        python main.py -h
+        python main.py -removeAll
+        
