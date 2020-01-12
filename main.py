@@ -7,6 +7,7 @@ import requests
 import re
 import webModule
 import time
+import sys
 
 AGENDA_TRAD_PREFIX_URL = 'https://agendatrad.org/'
 TAMM_KREIZ_PREFIX_URL = 'https://www.tamm-kreiz.bzh/'
@@ -168,6 +169,7 @@ def displayAllMail(databaseTK, databaseAT):
     print("Emails from Agenda Trad : " + str(len(mailAT)))
     print('Doublons = ' + str(mailInTkAndInAT))
     print('Pourcentage de doublons : ' + str(percentageDoublon))
+    print("================================================")
 
 
 def parseAgendaTrad(database, urlExplored):
@@ -245,15 +247,38 @@ def parseTammKreizh(orgaDatabase, urlExplored):
             orga.display()
 
 
+def cleanDB(db):
+    db.purge_table('Orga')
+    db.purge_table('website')
+
+
+def displayHelp():
+    print('-h for help')
+    print('-removeAll to remove all database')
+    print('-rat remove only agenda trad db')
+    print('-rtk remove only tamm kreizh db')
+
+
 def main():
-    #
+    # Command line manger
     dbAgendaTrad = TinyDB('db/databaseAgendaTrad.json')
+    dbTammKreizh = TinyDB('db/databaseTammKreizh.json')
     OrgaAgendaTrad = dbAgendaTrad.table('Orga')
     urlExploredAgendaTrad = dbAgendaTrad.table('website')
-
-    dbTammKreizh = TinyDB('db/databaseTammKreizh.json')
     OrgaTammKreizh = dbTammKreizh.table('Orga')
     urlExploredTammKreizh = dbTammKreizh.table('website')
+
+    if(len(sys.argv) > 1):
+        if sys.argv == 2:
+            if sys.argv[1] == '-h' or sys.argv[1] == '--help':
+                displayHelp()
+            elif sys.argv[1] == '-removeAll':
+                cleanDB(dbAgendaTrad)
+                cleanDB(dbTammKreizh)
+            elif sys.argv[1] == '-rat':
+                cleanDB(dbAgendaTrad)
+            elif sys.argv[1] == '-rtk':
+                cleanDB(dbTammKreizh)
 
     parseAgendaTrad(OrgaAgendaTrad, urlExploredAgendaTrad)
     parseTammKreizh(OrgaTammKreizh, urlExploredTammKreizh)
