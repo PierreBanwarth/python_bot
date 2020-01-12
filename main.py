@@ -272,6 +272,7 @@ def main():
         if sys.argv == 2:
             if sys.argv[1] == '-h' or sys.argv[1] == '--help':
                 displayHelp()
+                sys.exit(0)
             elif sys.argv[1] == '-removeAll':
                 cleanDB(dbAgendaTrad)
                 cleanDB(dbTammKreizh)
