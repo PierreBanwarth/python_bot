@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from lxml import html
 from tinydb import TinyDB, Query
 from organisation import Organisation
+import concurrent.futures
 import requests
 import re
 import webModule
@@ -50,14 +51,19 @@ contactList = []
 urlTab = {}
 
 
-def getAgendaTradPageListDetails(url, database, urlList):
-    href = webModule.getAllLinks(AGENDA_TRAD_PREFIX_URL+url)
-    for item in href:
-        if (
-            item.startswith('/orga_association/') or
-            item.startswith('/orga_autre/')
-        ):
-            getOrgaDetailsAgendaTrad(item, database, urlList)
+def getAgendaTradPageListDetails():
+    # getting all url in AgendaTradToExplore
+    result = []
+    for i in range(1, 27):
+        href = webModule.getAllLinks(AGENDA_TRAD_PREFIX_URL+'organisateurs/France?page='+str(i))
+        for item in href:
+            if (
+                item.startswith('/orga_association/') or
+                item.startswith('/orga_autre/')
+            ):
+                result.append(item)
+    return result
+
 
 
 def getOrgaAddress(tree):
@@ -113,11 +119,6 @@ def getOrgaDetailsAgendaTrad(url, database, urlList):
                 # newContact['facebookPages'] =
             else:
                 organisation.setWebsite(isThereAWebsite[0])
-                organisation.setMail(
-                    webModule.searchForMailInWebsite(
-                        organisation.getWebsite()
-                    )
-                )
 
         if len(getOrgaOldDates(tree, newUrl['address'])) > 0:
             organisation.setLastEventDate(
@@ -135,9 +136,16 @@ def getOrgaDetailsAgendaTrad(url, database, urlList):
             if len(database.search(Orga.name == organisation.getName())) == 0:
                 database.insert(organisation.toDict())
                 organisation.display()
+def updateDatabaseAddingMails(database):
+    Orga = Query()
+    result = []
+    docs =  database.search(Orga['website'].exists())
+    for item in docs:
+        item['mail-address'] = webModule.searchForMailInWebsite(item['website'])
+    database.write_back(docs)
 
 
-def getAllMail(database):
+def getAllMailFromWebsiteInDatabase(database):
     Orga = Query()
     result = []
     for item in database.search(Orga['mail-address'].exists()):
@@ -145,9 +153,11 @@ def getAllMail(database):
     return list(set(result))
 
 
+
+
 def displayAllMail(databaseTK, databaseAT):
-    mailAT = getAllMail(databaseAT)
-    mailTK = getAllMail(databaseTK)
+    mailAT = getAllMailFromWebsiteInDatabase(databaseAT)
+    mailTK = getAllMailFromWebsiteInDatabase(databaseTK)
     print(mailAT)
     print(mailTK)
     mailInTkAndInAT = 0
@@ -172,10 +182,8 @@ def displayAllMail(databaseTK, databaseAT):
 
 
 def parseAgendaTrad(database, urlExplored):
-    for i in range(1, 27):
-        getAgendaTradPageListDetails(
-            'organisateurs/France?page='+str(i), database, urlExplored
-        )
+        for item in getAgendaTradPageListDetails():
+            getOrgaDetailsAgendaTrad(item, database, urlList)
 
 
 def getAnnuaireTammKreizhUrlList():
@@ -204,46 +212,63 @@ def TammKreizhGetWebsiteFromeTree(tree):
         '//a[@class="listingitemitemtitleaddress circle-chevron-arrow"]/@href'
     )
 
+def parseTammKreizhUrl(url, orgaDatabase, urlExplored):
+    # searching for all : listingitemitemtitleaddress
+    urlToExplore = TAMM_KREIZ_PREFIX_URL+url
+    urlDatabaseQuery = Query()
+    newUrl = {}
+
+    page = requests.get(urlToExplore)
+    tree = html.fromstring(page.content)
+    info = TammKreizhGetInfoFromeTree(tree)
+    orga = Organisation()
+    orga.setSource(TAMM_KREIZ_PREFIX_URL)
+    name = TammKreizhGetNameFromeTree(tree)
+    orga.setName(name[0])
+    for item in info:
+        item = item.replace("\\n", "")
+        item = item.replace("\\t", "")
+        item = item.replace("\\r", "")
+        pattern = re.compile('[@_!#$%^&*()<>?}{~:]')
+        if pattern.search(item) is not None:
+            orga.addMail(item)
+        if item.startswith('0'):
+            orga.setPhoneNumber(item)
+    website = TammKreizhGetWebsiteFromeTree(tree)
+    for item in website:
+        if 'facebook' in item:
+            orga.setFacebook(item)
+        else:
+            orga.setWebsite(item)
+    orga.setSourceUrl(url)
+    return orga
 
 def parseTammKreizh(orgaDatabase, urlExplored):
     links = getAnnuaireTammKreizhUrlList()
-    for link in links:
-        # searching for all : listingitemitemtitleaddress
-        urlToExplore = TAMM_KREIZ_PREFIX_URL+link
-        urlDatabaseQuery = Query()
-        newUrl = {}
-        if len(urlExplored.search(urlDatabaseQuery.address == link)) == 0:
-            newUrl['address'] = link
-            urlExplored.insert(newUrl)
-            page = requests.get(urlToExplore)
-            tree = html.fromstring(page.content)
-            info = TammKreizhGetInfoFromeTree(tree)
-            orga = Organisation()
-            orga.setSource(TAMM_KREIZ_PREFIX_URL)
-            name = TammKreizhGetNameFromeTree(tree)
-            orga.setName(name[0])
-            for item in info:
-                item = item.replace("\\n", "")
-                item = item.replace("\\t", "")
-                item = item.replace("\\r", "")
-                pattern = re.compile('[@_!#$%^&*()<>?}{~:]')
-                if pattern.search(item) is not None:
-                    orga.addMail(item)
-                if item.startswith('0'):
-                    orga.setPhoneNumber(item)
-            website = TammKreizhGetWebsiteFromeTree(tree)
-            for item in website:
-                if 'facebook' in item:
-                    orga.setFacebook(item)
-                else:
-                    orga.setWebsite(item)
-                    orga.setMail(
-                        webModule.searchForMailInWebsite(orga.getWebsite())
-                    )
-            Orga = Query()
-            if len(orgaDatabase.search(Orga.name == orga.getName())) == 0:
-                orgaDatabase.insert(orga.toDict())
-            orga.display()
+    print("test")
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        # Start the load operations and mark each future with its URL
+        future_to_url = {executor.submit(parseTammKreizhUrl, url, orgaDatabase, urlExplored): url for url in links}
+        for future in concurrent.futures.as_completed(future_to_url):
+            url = future_to_url[future]
+            try:
+                orga = future.result()
+                orga.display()
+                Orga = Query()
+                urlDatabaseQuery = Query()
+                urlExplored = orga.getSourceUrl()
+
+                if len(orgaDatabase.search(Orga.name == orga.getName())) == 0:
+                    orgaDatabase.insert(orga.toDict())
+                if len(urlExplored.search(urlDatabaseQuery.address == url)) == 0:
+                    newUrl['address'] = url
+                    urlExplored.insert(newUrl)
+
+            except Exception as exc:
+                print('%r generated an exception: %s' % (url, exc))
+            else:
+                print('%r page is %d bytes' % (url, len(data)))
+
 
 
 def cleanDB(db):
@@ -256,6 +281,7 @@ def displayHelp():
     print('-removeAll to remove all database')
     print('-rat remove only agenda trad db')
     print('-rtk remove only tamm kreizh db')
+
 
 
 def main():
@@ -283,9 +309,10 @@ def main():
                 displayHelp()
                 exit(0)
 
-    parseAgendaTrad(OrgaAgendaTrad, urlExploredAgendaTrad)
+    # parseAgendaTrad(OrgaAgendaTrad, urlExploredAgendaTrad)
     parseTammKreizh(OrgaTammKreizh, urlExploredTammKreizh)
-
+    getAllMailFromWebsiteInDatabase(OrgaAgendaTrad)
+    getAllMailFromWebsiteInDatabase(OrgaTammKreizh)
     # mailList = displayAllMail(OrgaAgendaTrad)
     displayAllMail(OrgaTammKreizh, OrgaAgendaTrad)
 

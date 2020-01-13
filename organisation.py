@@ -9,6 +9,13 @@ class Organisation:
         self.website = 'not found'
         self.lastEventDate = 'not found'
         self.phoneNumber = 'not found'
+        self.sourceUrl = ''
+
+    def setSourceUrl(self, s):
+        self.sourceUrl = s
+
+    def getSourceUrl(self):
+        return self.sourceUrl
 
     def setSource(self, s):
         self.source = s

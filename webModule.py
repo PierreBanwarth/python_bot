@@ -4,7 +4,19 @@ from lxml import html
 from bs4 import BeautifulSoup
 import requests.exceptions
 import re
-from validate_email import validate_email
+
+
+def isEmailValid(string):
+    return (
+        'wix' not in string and
+        (
+            string.endswith('.com') or
+            string.endswith('.org') or
+            string.endswith('.eu') or
+            string.endswith('.bzh') or
+            string.endswith('.fr')
+        )
+    )
 
 
 def getAllLinks(url):
@@ -60,20 +72,9 @@ def getMailTabFromWebsite(url):
                 ] if match
             ]
             for item in results:
-                print('=========Email=============')
-                print(item)
-                print('============================')
-
-                if validate_email(item):
-                    if (
-                        'wix' not in item and
-                        (
-                            item.endswith('.com') or
-                            item.endswith('.org') or
-                            item.endswith('.eu') or
-                            item.endswith('.bzh') or
-                            item.endswith('.fr')
-                        )
-                    ):
-                        finalMailing.append(item)
+                if (isEmailValid(item)):
+                    print('email validated : '+item)
+                    finalMailing.append(item)
+                else:
+                    print('email not validated : '+item)
     return list(set(finalMailing))
