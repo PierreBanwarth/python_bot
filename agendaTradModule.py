@@ -1,18 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from lxml import html
-from tinydb import TinyDB, Query
+from tinydb import Query
 
 from organisation import Organisation
 import concurrent.futures
-import requests
-import re
 import webModule
-import tammKreizhModule
-import time
-import sys
 
 AGENDA_TRAD_PREFIX_URL = 'https://agendatrad.org/'
+
 
 def getAgendaTradPageListDetails(orgaDatabase):
     # getting all url in AgendaTradToExplore
@@ -52,6 +48,7 @@ def getOrgaAddress(tree):
         countryName
     )
 
+
 def getName(tree):
     return tree.xpath('//h2[@class="entitie_name rouge"]/text()')[0]
 
@@ -77,6 +74,7 @@ def getInfoFromTreeAgendaTrad(tree):
     # Adding organisation to database if she has already make some events
     return organisation
 
+
 def parseFromList(links):
     orgaListe = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
@@ -94,6 +92,7 @@ def parseFromList(links):
             except Exception as exc:
                 print('%r generated an exception: %s' % (url, exc))
     return orgaListe
+
 
 def parseAgendaTrad(orgaDatabase):
     links = getAgendaTradPageListDetails(orgaDatabase)

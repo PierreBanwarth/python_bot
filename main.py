@@ -1,22 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from lxml import html
 from tinydb import TinyDB, Query
 
-from organisation import Organisation
-import concurrent.futures
-import requests
-import re
 import webModule
 import tammKreizhModule
 import agendaTradModule
 import time
 import sys
 
-
-
 contactList = []
 urlTab = {}
+
 
 def updateAddingLinksToExplore(database):
     Orga = Query()
@@ -27,13 +21,16 @@ def updateAddingLinksToExplore(database):
         )
     database.write_back(docs)
 
+
 def updateDatabaseAddingMails(database):
     Orga = Query()
     docs = database.search(Orga['website'] != 'not found')
     for item in docs:
         if item['llinksToExlpore']:
             print('---')
-            item['mails'] = webModule.searchForMailInWebsite(item['llinksToExlpore'])
+            item['mails'] = webModule.searchForMailInWebsite(
+                item['llinksToExlpore']
+            )
     database.write_back(docs)
 
 
@@ -54,6 +51,7 @@ def getAllMailFromWebsiteInDatabaseFromSource(database, source):
             result = result + item['mail-address']
     return list(set(result))
 
+
 def getAllWebsite(database, source):
     Orga = Query()
     result = []
@@ -62,6 +60,7 @@ def getAllWebsite(database, source):
             if item['website'] != 'not found':
                 result.append(item['website'])
     return list(set(result))
+
 
 def getAllWithoutWebsite(database, source):
     Orga = Query()
@@ -72,33 +71,42 @@ def getAllWithoutWebsite(database, source):
                 result.append(item['website'])
     return result
 
+
 def displayAllMail(database):
     print("==============Website       ====================")
-    nbWebsitesAT= len(getAllWebsite(database, 'agendatrad'))
+    nbWebsitesAT = len(getAllWebsite(database, 'agendatrad'))
     nbWebsitesTK = len(getAllWebsite(database, 'tamm-kreiz'))
-    nombreOrgaSansWebsiteAgendaTrad = len(getAllWithoutWebsite(database, 'agendatrad'))
-    nombreOrgaSansWebsitetammkreiz = len(getAllWithoutWebsite(database, 'tamm-kreiz'))
-    print('Website from Tamm Kreiz : '+ str(nbWebsitesTK))
-    print('Website from AgendaTrad : '+ str(nbWebsitesAT))
+    nombreOrgaSansWebsiteAgendaTrad = len(
+        getAllWithoutWebsite(database, 'agendatrad')
+    )
+    nombreOrgaSansWebsitetammkreiz = len(
+        getAllWithoutWebsite(database, 'tamm-kreiz')
+    )
+    print('Website from Tamm Kreiz : ' + str(nbWebsitesTK))
+    print('Website from AgendaTrad : ' + str(nbWebsitesAT))
 
-    print('Orga Without website from Tamm Kreiz : '+ str(nombreOrgaSansWebsitetammkreiz))
-    print('Orga Without website from AgendaTrad : '+ str(nombreOrgaSansWebsiteAgendaTrad))
+    print('Orga Without website from Tamm Kreiz : ' + str(
+        nombreOrgaSansWebsitetammkreiz
+    ))
+    print('Orga Without website from AgendaTrad : ' + str(
+        nombreOrgaSansWebsiteAgendaTrad
+    ))
     nbsites = nbWebsitesAT + nbWebsitesTK
     nbNoSites = nombreOrgaSansWebsitetammkreiz + nombreOrgaSansWebsitetammkreiz
     nbOrga = nbsites + nbNoSites
     percentageSitesAll = (nbsites * 100)/nbOrga
-    percentageSitesTK = (nbWebsitesTK * 100)/(nbWebsitesTK+nombreOrgaSansWebsitetammkreiz)
-    percentageSitesAT = (nbWebsitesAT * 100)/(nbWebsitesAT+nombreOrgaSansWebsiteAgendaTrad)
-
+    nbOrgaTK = nbWebsitesTK + nombreOrgaSansWebsitetammkreiz
+    nbOrgaAT = nbWebsitesAT + nombreOrgaSansWebsiteAgendaTrad
+    percentageSitesTK = (nbWebsitesTK * 100)/(nbOrgaTK)
+    percentageSitesAT = (nbWebsitesAT * 100)/(nbOrgaAT)
 
     print('Pourcentage de sites Tamm Kreiz : ' + str(percentageSitesTK))
     print('Pourcentage de sites AgendaTrad : ' + str(percentageSitesAT))
     print('Pourcentage de sites total : ' + str(percentageSitesAll))
     print("================================================")
 
-
-    mailAT = getAllMailFromWebsiteInDatabaseFromSource(database,'agendatrad')
-    mailTK = getAllMailFromWebsiteInDatabaseFromSource(database,'tamm-kreiz')
+    mailAT = getAllMailFromWebsiteInDatabaseFromSource(database, 'agendatrad')
+    mailTK = getAllMailFromWebsiteInDatabaseFromSource(database, 'tamm-kreiz')
 
     mailInTkAndInAT = 0
     newMail = 0
@@ -121,7 +129,6 @@ def displayAllMail(database):
     print("================================================")
     print(mailAT)
     print(mailTK)
-
 
 
 def cleanDB(db):

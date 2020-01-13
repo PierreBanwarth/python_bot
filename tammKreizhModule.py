@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from lxml import html
-from tinydb import TinyDB, Query
+from tinydb import Query
 
 from organisation import Organisation
 import concurrent.futures
-import requests
 import re
 import webModule
-import tammKreizhModule
-import time
-import sys
 
 TAMM_KREIZ_PREFIX_URL = 'https://www.tamm-kreiz.bzh'
 TAMM_KREIZ_POSTFIX = '/liste-lettre/15/'
@@ -66,6 +62,7 @@ def TammKreizhGetWebsiteFromeTree(tree):
         '//a[@class="listingitemitemtitleaddress circle-chevron-arrow"]/@href'
     )
 
+
 def getAnnuaireTammKreizhUrlList(database):
     links = []
     Orga = Query()
@@ -99,6 +96,7 @@ def getInfoFromTreeTammKreizh(tree):
         else:
             orga.setWebsite(item)
     return orga
+
 
 def parseTammKreizh(orgaDatabase):
     links = getAnnuaireTammKreizhUrlList(orgaDatabase)

@@ -6,6 +6,7 @@ import requests.exceptions
 import re
 import concurrent.futures
 
+
 def isEmailValid(string):
     return (
         'wix' not in string and
@@ -65,26 +66,28 @@ def getAllLinks(url):
                     if url in href:
                         result.append(link)
                 return list(set(href))
-            except Exception as exc:
+            except Exception:
                 pass
+
 
 def searchForMailInWebsite(urlListe):
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
         # Start the load operations and mark each future with its URL
-
         future_to_url = {
             executor.submit(getUrlContent, url):  url for url in urlListe
         }
         for future in concurrent.futures.as_completed(future_to_url):
-            url = future_to_url[future]
+            # url = future_to_url[future]
             try:
                 soup = BeautifulSoup(future.result(), "html.parser")
                 email = soup(
-                    text=re.compile(r'[A-Za-z0-9\.\+_-]+@[A-Za-z0-9\._-]+\.[a-zA-Z]*')
+                    text=re.compile(
+                        r'[A-Za-z0-9\.\+_-]+@[A-Za-z0-9\._-]+\.[a-zA-Z]*'
+                    )
                 )
                 orgaListe = getAllMails(email)
                 print(orgaListe)
                 return list(set(orgaListe))
-            except Exception as exc:
+            except Exception:
                 pass
     return []
