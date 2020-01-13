@@ -33,6 +33,7 @@ class Organisation:
         self.facebookPages = s
 
     def addMail(self, m):
+
         self.mailAddress.append(m)
 
     def setMail(self, s):
@@ -60,26 +61,27 @@ class Organisation:
     def display(self):
         print('================================')
         if 'not found' not in self.source:
-            print('Source : ' + self.source)
+            print(('Source : ' + self.source).encode('utf-8'))
         if 'not found' not in self.name:
-            print('Name : ' + self.name)
+            print(('Name : ' + self.name).encode('utf-8'))
         if 'not found' not in self.address:
-            print('address : ' + self.address)
+            print(('address : ' + self.address).encode('utf-8'))
         if 'not found' not in self.facebookPages:
-            print('facebook : ' + self.facebookPages)
+            print(('facebook : ' + self.facebookPages).encode('utf-8'))
         if len(self.mailAddress):
             for item in self.mailAddress:
-                print('mail : ' + item)
+                print(('mail : ' + item).encode('utf-8'))
         if 'not found' not in self.website:
-            print('website : ' + self.website)
+            print(('website : ' + self.website).encode('utf-8'))
         if 'not found' not in self.lastEventDate:
-            print('lastEventDate : ' + self.lastEventDate)
+            print(('lastEventDate : ' + self.lastEventDate).encode('utf-8'))
         if 'not found' not in self.phoneNumber:
-            print('phone number : ' + self.phoneNumber)
+            print(('phone number : ' + self.phoneNumber).encode('utf-8'))
         print('================================')
 
     def toDict(self):
         result = {}
+        result['sourceUrl'] = self.sourceUrl
         result['source'] = self.source
         result['name'] = self.name
         result['address'] = self.address
