@@ -60,16 +60,20 @@ def getAllLinks(url):
             try:
                 tree = html.fromstring(future.result())
                 href = tree.xpath('//a/@href')
+                result = []
+                for link in href:
+                    if url in href:
+                        result.append(link)
                 return list(set(href))
             except Exception as exc:
                 pass
-                
-def searchForMailInWebsite(url):
-    orgaListe = getAllLinks(url)
+
+def searchForMailInWebsite(urlListe):
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
         # Start the load operations and mark each future with its URL
+
         future_to_url = {
-            executor.submit(getUrlContent, url):  url for url in orgaListe
+            executor.submit(getUrlContent, url):  url for url in urlListe
         }
         for future in concurrent.futures.as_completed(future_to_url):
             url = future_to_url[future]
@@ -79,6 +83,8 @@ def searchForMailInWebsite(url):
                     text=re.compile(r'[A-Za-z0-9\.\+_-]+@[A-Za-z0-9\._-]+\.[a-zA-Z]*')
                 )
                 orgaListe = getAllMails(email)
+                print(orgaListe)
+                return list(set(orgaListe))
             except Exception as exc:
                 pass
-    return list(set(orgaListe))
+    return []

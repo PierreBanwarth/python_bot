@@ -18,13 +18,22 @@ import sys
 contactList = []
 urlTab = {}
 
+def updateAddingLinksToExplore(database):
+    Orga = Query()
+    docs = database.search(Orga['website'] != 'not found')
+    for item in docs:
+        item['llinksToExlpore'] = webModule.getAllLinks(
+            item['website']
+        )
+    database.write_back(docs)
+
 def updateDatabaseAddingMails(database):
     Orga = Query()
     docs = database.search(Orga['website'] != 'not found')
     for item in docs:
-        item['mail-address'] = webModule.searchForMailInWebsite(
-            item['website']
-        )
+        if item['llinksToExlpore']:
+            print('---')
+            item['mails'] = webModule.searchForMailInWebsite(item['llinksToExlpore'])
     database.write_back(docs)
 
 
@@ -104,7 +113,7 @@ def displayAllMail(database):
             newMails.append(item)
             newMail = newMail + 1
     percentageDoublon = (mailInTkAndInAT * 100)/len(mailTK)
-    
+
     print("Emails from Tamm Kreizh : " + str(len(mailTK)))
     print("Emails from Agenda Trad : " + str(len(mailAT)))
     print('Doublons = ' + str(mailInTkAndInAT))
@@ -155,6 +164,7 @@ def main():
     orgaListe = agendaTradModule.parseAgendaTrad(Orga)
     orgaListe = orgaListe + tammKreizhModule.parseTammKreizh(Orga)
     insertAllInDb(orgaListe, Orga)
+    updateAddingLinksToExplore(Orga)
     updateDatabaseAddingMails(Orga)
     displayAllMail(Orga)
 
