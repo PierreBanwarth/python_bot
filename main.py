@@ -16,7 +16,7 @@ def updateAddingLinksToExplore(database):
     Orga = Query()
     docs = database.search(Orga['website'] != 'not found')
     for item in docs:
-        item['llinksToExlpore'] = webModule.getAllLinks(
+        item['llinksToExlpore'] = webModule.getAllSubLinks(
             item['website']
         )
     database.write_back(docs)
@@ -168,11 +168,11 @@ def main():
                 displayHelp()
                 exit(0)
 
-    orgaListe = agendaTradModule.parseAgendaTrad(Orga)
-    orgaListe = orgaListe + tammKreizhModule.parseTammKreizh(Orga)
-    insertAllInDb(orgaListe, Orga)
+    # orgaListe = agendaTradModule.parseAgendaTrad(Orga)
+    # orgaListe = orgaListe + tammKreizhModule.parseTammKreizh(Orga)
+    # insertAllInDb(orgaListe, Orga)
     updateAddingLinksToExplore(Orga)
-    updateDatabaseAddingMails(Orga)
+    # updateDatabaseAddingMails(Orga)
     displayAllMail(Orga)
 
 

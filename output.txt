@@ -1,0 +1,93 @@
+utf-8
+//abondansecontactimpro.jimdofree.com/j/privacy
+//abondansecontactimpro.jimdofree.com/j/cookies/policy
+/contact/
+/contact
+/index.php/contact
+/contacts
+/contacts
+/contactes-contacts/
+/contactes-contacts/
+/contact/
+/contact/
+/index.php/contact-a-liens
+/index.php/contact-a-liens/contact
+/index.php/contact-a-liens/contactez-le-groupe-au-gre-des-vents
+/index.php/contact-a-liens/nos-liens-preferes
+/fr/nous-contacter
+/index.php/contacts
+/index.php/l-association/contacter-l-association
+/index.php/contact
+/index.php/nous-contacter/nous-contacter
+/index.php/nous-contacter/mentions-legales
+/contact/
+/nouscontacter/adhesionfitt
+/nouscontacter/devenir-ambassadeur
+/nouscontacter/devenir-mecene
+/nouscontacter/je-veux-etre-benevole-du-festival
+/infos/contactmail
+/contact
+/contact.php
+/contact?lang=oc
+/pratique/nous-contacter/
+/cirdoc-pratique/contacts/
+/contact/
+/contact/
+/la-faribole/presentation-de-la-faribole/nous-contacter
+/la-faribole/presentation-de-la-faribole/nous-contacter
+/la-faribole/presentation-de-la-faribole/nous-contacter
+/contact
+/fr/nous-contacter
+/fr/information/48280/prise-contact
+/fr/information/48280/prise-contact
+/fr/nous-contacter
+/fr/nous-contacter
+/contact
+/contact
+/contact
+/contact
+/groupe/los-tresbadors_2011/contact.html
+/contact.html
+/contact
+/contacts/
+/contacts/
+/nous-contacter
+/page/view/contact/nous-contacter
+/page/view/contact/qui-sommes-nous
+/site/routeducelte/contact-us
+/site/routeducelte/contact-us
+/site/routeducelte/contact-us
+/contact/
+/contact.html
+/index.php?option=com_contact&view=category&catid=0&Itemid=62&lang=fr
+/#contact
+/contact
+/index.php/contact
+/index.php/contact
+/index.php/contact
+/vie-municipale/police-municipale/contact
+/vie-municipale/police-municipale/contact
+/contact
+/index.php?option=com_contact&view=contact&id=11&Itemid=2691
+/index.php?option=com_contact&view=contact&id=11&Itemid=2691
+/contact/
+/site/routeducelte/contact-us
+/site/routeducelte/contact-us
+/site/routeducelte/contact-us
+==============Website       ====================
+Website from Tamm Kreiz : 403
+Website from AgendaTrad : 1230
+Orga Without website from Tamm Kreiz : 427
+Orga Without website from AgendaTrad : 1146
+Pourcentage de sites Tamm Kreiz : 48.55421686746988
+Pourcentage de sites AgendaTrad : 51.76767676767677
+Pourcentage de sites total : 65.66143948532368
+================================================
+Emails from Tamm Kreizh : 126
+Emails from Agenda Trad : 0
+Doublons = 0
+Pourcentage de doublons : 0.0
+================================================
+[]
+['jeunes-agriculteurs@ja29.com', 'nadoz.vor@gmail.com', 'mondialfolk@gmail.com', 'contact@danouet.bzh', 'assoledahut@orange.fr', 'd.v.cornelia@gmail.com', 'asso.musicale.meriadeg@gmail.com', 'communication@eklectison.fr', 'bro.plijidi@diwan.bzh', 'route.celte@gmail.com', 'nuitdufolk05@gmail.com', 'animasso@sarzeau.fr', 'oyoun-muzik@orange.fr', 'emglev@ebo.bzh', 'lesoncontinu@gmail.com', 'ecorcesetames@gmail.com', 'jp.lerallic@gmail.com', 'lebalmonte@gmail.com', 'breizhbritish@gmail.com', 'kenskoazell@gmail.com', 'billetterie@theatre-cornouaille.fr', 'laloure@wanadoo.fr', 'contact@bas35.org', 'accueil@forumnivillac.fr', 'christian.lajarriges@orange.fr', 'barzouges@gmail.com', 'plijadurcantenouz@gmail.com', 'kornboud@orange.fr', 'contact@latetedestrains.com', 'contact@bancpublic.org', 'contact.petra.neue@orange.fr', 'klervi.tiarvro@gmail.com', 'lgarandel.apc@wanadoo.fr', 'contact@mammdouarkafe.bzh', 'contact@oui-la-bretagne.bzh', 'abbpcommunication@gmail.com', 'festival.gauloiseriesdarvor@gmail.com', 'leplancherdesvalses@gmail.com', 'A.LOUIS@gmvagglo.bzh', 'ferme.lapannetiere@wanadoo.fr', 'espacebeausoleil@pontpean.fr', 'contact@foulpougnefestival.fr', 'lecarteldurien@gmail.com', 'yy_dodeur@yahoo.fr', 'contact@musiquestetues.com', 'zik.zh@yahoo.com', 'contact@skeudenn.bzh', 'bretonsduquebec@gmail.com', 'selaoucontact@gmail.com', 'cdj.moncontour@gmail.com', 'contact@larondedesjurons.org', 'confederation@kendalch.com', 'associationdbdb@gmail.com', 'contact@vachenantaise.fr', 'chateaudelarochejagu@cotesdarmor.fr', 'lesautochtones@yahoo.fr', 'festival@festival-interceltique.bzh', 'florianbouar@gmail.com', 'meq.association@yahoo.fr', 'francis.alet@wanadoo.fr', 'contact@comitedesfetesbaindebretagne.fr', 'info@legueulard.fr', 'accueil@espacekeraudy.com', 'boestandiaoul@wanadoo.fr', 'contact@bierelagaelle.com', 'contact@musiquesetscene.fr', 'preenbulles.bedee@free.fr', 'stages@studi-ha-dudi.bzh', 'brain2folie@gmail.com', 'divyezh.bruz@gmail.com', 'contact@tiarvro-bro-gwened.bzh', 'serviceculture@ville-gravelines.fr', 'cheripenseauvin@gmail.com', 'contact@missionbretonne.bzh', 'le.bar.hic@gmail.com', 'lesboutonsdenacre@sfr.fr', 'gallotonic@orange.fr', 'accueil@carre-magique.com', 'contact@quai-vert.com', 'singabretons@gmail.com', 'ecoledemusique.prm@wanadoo.fr', 'stefan@tamm-kreiz.bzh', 'declikdol@orange.fr', 'vivreatrestraou@gmail.com', 'caoze.toujou@gmail.com', 'ste-anne@auray-tourisme.com', 'musiquemissillac@hotmail.fr', 'association.movup@gmail.com', 'contact@strollad-dansou.bzh', 'amicale.bagadou.cercles.kemper@gmail.com', 'contact@maison-des-mineraux.org', 'contact@cacsud22.com', 'skv@wanadoo.fr', 'Contact@maisondelaharpe.org', 'mairie@bourgbarre.fr', 'stage.diato.locronan@gmail.com', 'ucap.plumelec@outlook.fr', 'info@breizh-amerika.com', 'mlc.taverny@free.fr', 'asso.macase@cafeplum.org', 'contact@asso-eclip.org', 'scelia@sargeleslemans.fr', 'imagesetsons.mediatheque@ploeren.fr', 'contact@epille.com', 'simisa@free.fr', 'association.lapagaie@orange.fr', 'galettesdumonde@free.fr', 'associationepissure@gmail.com', 'yaouank.korrigans@gmail.com', 'contact@terraque.fr', 'sachet.amelie@wanadoo.fr', 'modkoz@outlook.com', 'contact@mignoned.bzh', 'barbreton17@gmail.com', 'prod.aita@gmail.com', 'larchedespossibles@gmail.com', 'm.lefebvre@tiarvro-santbrieg.bzh', 'culturepeillac@wanadoo.fr', 'festbropagan@gmail.com', 'contact@lagrangeasons.com', 'collectifsurvieabeille@gmail.com', 'accueil@escale-ecouen.fr', 'yann.libouban17@orange.fr', 'contact@cie-eskemm.fr', 'printempsdessonneurslannion@gmail.com', 'collectifgonzo@collectifgonzo.fr']
+--- 1517.7670633792877 seconds ---
