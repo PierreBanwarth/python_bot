@@ -172,7 +172,8 @@ def main():
     # orgaListe = orgaListe + tammKreizhModule.parseTammKreizh(Orga)
     # insertAllInDb(orgaListe, Orga)
     updateAddingLinksToExplore(Orga)
-    # updateDatabaseAddingMails(Orga)
+    displayAllMail(Orga)
+    updateDatabaseAddingMails(Orga)
     displayAllMail(Orga)
 
 

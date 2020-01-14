@@ -59,8 +59,9 @@ def getAllSubLinks(url):
             url = future_to_url[future]
             try:
                 tree = html.fromstring(future.result())
-                href = tree.xpath('//a/@href')
+                href = tree.xpath('//a[contains(@href, "contact")]')
                 result = []
+
                 subdomain = tldextract.extract(url)[0]
                 for link in href:
                     if (
@@ -74,16 +75,15 @@ def getAllSubLinks(url):
                         'deezer' not in link and
                         '2018' not in link and
                         '2019' not in link and
-                        '2020' not in link and
-                        'contact' in link
+                        '2020' not in link
                     ):
                         if link[0] == '/':
                             result.append(url+link)
+                            print(url+link)
                         else:
                             result.append(link)
-                    else:
-                        print('====>' + link)
-                return list(set(href))
+                            print(link)
+                return list(set(result))
             except Exception:
                 pass
 
