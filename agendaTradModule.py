@@ -64,13 +64,12 @@ def getInfoFromTreeAgendaTrad(tree):
     organisation.setAddress(getOrgaAddress(tree))
     # Verification du site de l'asso
     website = getWebsite(tree)
+
     if len(website) > 0:
         if 'https://www.facebook.com/' in website[0]:
             organisation.setFacebook(website[0])
-            # newContact['facebookPages'] =
         else:
             organisation.setWebsite(website[0])
-
     # Adding organisation to database if she has already make some events
     return organisation
 

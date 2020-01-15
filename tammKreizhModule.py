@@ -83,7 +83,7 @@ def getInfoFromTreeTammKreizh(tree):
     name = TammKreizhGetNameFromeTree(tree)
     orga.setName(name[0])
     for item in info:
-        result = webModule.getAllMails(item)
+        result = webModule.getAllMailsFromString(item)
         orga.setMail(result)
         string = re.sub(r'\s', '', item)
         if string.startswith('0'):

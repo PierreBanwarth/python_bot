@@ -6,6 +6,7 @@ import requests.exceptions
 import re
 import concurrent.futures
 import tldextract
+MAX_WORKERS = 5
 
 def isEmailValid(string):
     return (
@@ -22,11 +23,11 @@ def isEmailValid(string):
 
 def getUrlContent(urlToExplore):
     # searching for all : listingitemitemtitleaddress
-    page = requests.get(urlToExplore)
+    page = requests.get(urlToExplore, timeout=10)
     return page.content
 
 
-def getAllMails(string):
+def getAllMailsFromString(string):
     curedString = str(string)
     curedString = curedString.replace("\\t", "")
     curedString = curedString.replace("\\n", "")
@@ -50,7 +51,7 @@ def getAllMails(string):
 
 def getAllSubLinks(url):
     href = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         # Start the load operations and mark each future with its URL
         future_to_url = {
             executor.submit(getUrlContent, url): url
@@ -59,7 +60,7 @@ def getAllSubLinks(url):
             url = future_to_url[future]
             try:
                 tree = html.fromstring(future.result())
-                href = tree.xpath('//a[contains(@href, "contact")]')
+                href = tree.xpath('//a/@href')
                 result = []
 
                 subdomain = tldextract.extract(url)[0]
@@ -75,7 +76,8 @@ def getAllSubLinks(url):
                         'deezer' not in link and
                         '2018' not in link and
                         '2019' not in link and
-                        '2020' not in link
+                        '2020' not in link and
+                        'contact' in link
                     ):
                         if link[0] == '/':
                             result.append(url+link)
@@ -87,9 +89,34 @@ def getAllSubLinks(url):
             except Exception:
                 pass
 
+def getAllMailToFromUrl(urlListe):
+    href = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        # Start the load operations and mark each future with its URL
+        future_to_url = {
+            executor.submit(getUrlContent, url): url for url in urlListe
+        }
+        for future in concurrent.futures.as_completed(future_to_url):
+            url = future_to_url[future]
+            try:
+                tree = html.fromstring(future.result())
+                href = tree.xpath('//a/@href')
+                result = []
+
+                subdomain = tldextract.extract(url)[0]
+                for link in href:
+                    regexp = re.compile(("mailto:([a-z0-9!#$%&'*+\/=?^_`{|}~-]+@[a-z0-9]+\.[a-zA-Z0-9-.]+)"))
+                    links = re.findall(regexp, link)
+                    print(links)
+                    result = result + links
+                return list(set(result))
+            except Exception as e:
+                print(e)
+                return []
+
 def getAllLinks(url):
     href = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         # Start the load operations and mark each future with its URL
         future_to_url = {
             executor.submit(getUrlContent, url): url
@@ -103,12 +130,12 @@ def getAllLinks(url):
                 for link in href:
                     result.append(link)
                 return list(set(href))
-            except Exception:
-                pass
+            except Exception as e:
+                print(e)
 
 
 def searchForMailInWebsite(urlListe):
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         # Start the load operations and mark each future with its URL
         future_to_url = {
             executor.submit(getUrlContent, url):  url for url in urlListe
@@ -122,9 +149,9 @@ def searchForMailInWebsite(urlListe):
                         r'[A-Za-z0-9\.\+_-]+@[A-Za-z0-9\._-]+\.[a-zA-Z]*'
                     )
                 )
-                orgaListe = getAllMails(email)
+                orgaListe = getAllMailsFromString(email)
                 print(orgaListe)
                 return list(set(orgaListe))
-            except Exception:
-                pass
+            except Exception as e:
+                print(e)
     return []

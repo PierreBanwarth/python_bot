@@ -10,6 +10,7 @@ class Organisation:
         self.lastEventDate = 'not found'
         self.phoneNumber = 'not found'
         self.sourceUrl = ''
+        self.linksToExlpore = []
 
     def setSourceUrl(self, s):
         self.sourceUrl = s
@@ -42,6 +43,7 @@ class Organisation:
 
     def setWebsite(self, s):
         self.website = s
+        self.linksToExlpore.append(s)
 
     def getWebsite(self):
         return self.website
@@ -89,4 +91,5 @@ class Organisation:
         result['mail-address'] = self.mailAddress
         result['website'] = self.website
         result['last-event-date'] = self.lastEventDate
+        result['linksToExlpore'] = self.linksToExlpore
         return result

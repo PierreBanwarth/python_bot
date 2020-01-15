@@ -16,9 +16,30 @@ def updateAddingLinksToExplore(database):
     Orga = Query()
     docs = database.search(Orga['website'] != 'not found')
     for item in docs:
-        item['llinksToExlpore'] = webModule.getAllSubLinks(
-            item['website']
-        )
+        if item['website']:
+            item['linksToExlpore'] = webModule.getAllSubLinks(
+                item['website']
+            )
+        if item['linksToExlpore']:
+            item['linksToExlpore'].append(item['website'])
+            print(item['linksToExlpore'])
+    database.write_back(docs)
+
+
+def updateDatabaseAddingMailsFromMailTo(database):
+    Orga = Query()
+    docs = database.search(Orga['website'] != 'not found')
+    for item in docs:
+        if item['linksToExlpore']:
+            newResult = webModule.getAllMailToFromUrl(
+                item['linksToExlpore']
+            )
+            if item['mail-address']:
+                item['mail-address'] = item['mail-address'] + newResult
+            else:
+                item['mail-address'] = newResult
+
+            print(item['mail-address'])
     database.write_back(docs)
 
 
@@ -26,11 +47,11 @@ def updateDatabaseAddingMails(database):
     Orga = Query()
     docs = database.search(Orga['website'] != 'not found')
     for item in docs:
-        if item['llinksToExlpore']:
-            print('---')
-            item['mails'] = webModule.searchForMailInWebsite(
-                item['llinksToExlpore']
+        if item['linksToExlpore']:
+            item['mail-address'] = webModule.searchForMailInWebsite(
+                item['linksToExlpore']
             )
+            print(item['mail-address'])
     database.write_back(docs)
 
 
@@ -167,13 +188,22 @@ def main():
             else:
                 displayHelp()
                 exit(0)
-
+    #
     # orgaListe = agendaTradModule.parseAgendaTrad(Orga)
-    # orgaListe = orgaListe + tammKreizhModule.parseTammKreizh(Orga)
     # insertAllInDb(orgaListe, Orga)
-    updateAddingLinksToExplore(Orga)
+    #
+    # print('getting orga list')
+    # orgaListe = tammKreizhModule.parseTammKreizh(Orga)
+    # print('inserting db')
+    # insertAllInDb(orgaListe, Orga)
+    #
+    # print('adding links to explore')
+    # updateAddingLinksToExplore(Orga)
+    #
+    # print('adding finded mail in db')
+    # updateDatabaseAddingMails(Orga)
     displayAllMail(Orga)
-    updateDatabaseAddingMails(Orga)
+    updateDatabaseAddingMailsFromMailTo(Orga)
     displayAllMail(Orga)
 
 
