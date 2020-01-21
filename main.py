@@ -148,8 +148,36 @@ def displayAllMail(database):
     print('Doublons = ' + str(mailInTkAndInAT))
     print('Pourcentage de doublons : ' + str(percentageDoublon))
     print("================================================")
-    print(mailAT)
-    print(mailTK)
+
+    getAllMailAvailableToSend(mailAT, mailTK,  getOldMailFromMailChimp())
+
+
+def getAllMailAvailableToSend(mailAT, mailTK, OldMail):
+    newMails = []
+    doublonsAT = 0
+    doublonsTK = 0
+    for item in mailAT:
+        if item in OldMail:
+            doublonsAT = doublonsAT + 1
+        else:
+            newMails.append(item)
+    for item in mailTK:
+        if item in OldMail:
+            doublonsTK = doublonsTK + 1
+        else:
+            newMails.append(item)
+
+    print("================================================")
+    print("Emails from Tamm Kreizh : " + str(len(mailTK)))
+    print("Doublons from Tamm Kreiz : " + str(doublonsTK))
+
+    print("Emails from Agenda Trad : " + str(len(mailAT)))
+    print("Doublons from Agenda Trad : " + str(doublonsAT))
+    print("================================================")
+    print("old Mails : " + str(len(OldMail)))
+    print("================================================")
+    print(newMails)
+    print("New Mails : " + str(len(newMails)))
 
 
 def cleanDB(db):
@@ -171,6 +199,18 @@ def insertAllInDb(listeOrga, database):
             organisation.display()
 
 
+def getOldMailFromMailChimp():
+    filepath = 'db/mails-from-mailchimp.txt'
+    result = []
+    with open(filepath) as fp:
+        line = fp.readline()
+        while line:
+            line = fp.readline()
+            curedString = webModule.cureString(line)
+            result.append(curedString)
+    return result
+
+
 def main():
     # Command line manger
     db = TinyDB('db/database.json')
@@ -184,31 +224,30 @@ def main():
                 cleanDB(db)
             elif sys.argv[1] == '-getData':
                 displayAllMail(Orga)
-                exit(0)
             else:
                 displayHelp()
-                exit(0)
-    #
-    # orgaListe = agendaTradModule.parseAgendaTrad(Orga)
-    # insertAllInDb(orgaListe, Orga)
-    #
-    # print('getting orga list')
-    # orgaListe = tammKreizhModule.parseTammKreizh(Orga)
-    # print('inserting db')
-    # insertAllInDb(orgaListe, Orga)
-    #
-    # print('adding links to explore')
-    # updateAddingLinksToExplore(Orga)
-    #
-    # print('adding finded mail in db')
-    # updateDatabaseAddingMails(Orga)
-    displayAllMail(Orga)
-    updateDatabaseAddingMailsFromMailTo(Orga)
-    displayAllMail(Orga)
+    else:
+        orgaListe = agendaTradModule.parseAgendaTrad(Orga)
+        insertAllInDb(orgaListe, Orga)
+
+        print('getting orga list')
+        orgaListe = tammKreizhModule.parseTammKreizh(Orga)
+
+        print('inserting db')
+        insertAllInDb(orgaListe, Orga)
+
+        print('adding links to explore')
+        updateAddingLinksToExplore(Orga)
+
+        print('adding finded mail in db')
+        updateDatabaseAddingMails(Orga)
+        displayAllMail(Orga)
+        updateDatabaseAddingMailsFromMailTo(Orga)
+        displayAllMail(Orga)
 
 
 if __name__ == "__main__":
     print(sys.getdefaultencoding())
     start_time = time.time()
     main()
-    print("--- %s seconds ---" % (time.time() - start_time))
+    print("--- %s Minutes ---" % ((time.time() - start_time)/60))
