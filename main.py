@@ -1,107 +1,27 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from tinydb import TinyDB, Query
-
+from tinydb import TinyDB
+import sys
+sys.path.append('modules/')
 import webModule
 import tammKreizhModule
 import agendaTradModule
+import databaseModule
 import time
-import sys
 
 contactList = []
 urlTab = {}
 
 
-def updateAddingLinksToExplore(database):
-    Orga = Query()
-    docs = database.search(Orga['website'] != 'not found')
-    for item in docs:
-        if item['website']:
-            item['linksToExlpore'] = webModule.getAllSubLinks(
-                item['website']
-            )
-        if item['linksToExlpore']:
-            item['linksToExlpore'].append(item['website'])
-            print(item['linksToExlpore'])
-    database.write_back(docs)
-
-
-def updateDatabaseAddingMailsFromMailTo(database):
-    Orga = Query()
-    docs = database.search(Orga['website'] != 'not found')
-    for item in docs:
-        if item['linksToExlpore']:
-            newResult = webModule.getAllMailToFromUrl(
-                item['linksToExlpore']
-            )
-            if item['mail-address']:
-                item['mail-address'] = item['mail-address'] + newResult
-            else:
-                item['mail-address'] = newResult
-
-            print(item['mail-address'])
-    database.write_back(docs)
-
-
-def updateDatabaseAddingMails(database):
-    Orga = Query()
-    docs = database.search(Orga['website'] != 'not found')
-    for item in docs:
-        if item['linksToExlpore']:
-            item['mail-address'] = webModule.searchForMailInWebsite(
-                item['linksToExlpore']
-            )
-            print(item['mail-address'])
-    database.write_back(docs)
-
-
-def getAllMailFromWebsiteInDatabase(database):
-    Orga = Query()
-    result = []
-    for item in database.search(Orga['mail-address'].exists()):
-
-        result = result + item['mail-address']
-    return list(set(result))
-
-
-def getAllMailFromWebsiteInDatabaseFromSource(database, source):
-    Orga = Query()
-    result = []
-    for item in database.search(Orga['mail-address'].exists()):
-        if source in item['sourceUrl']:
-            result = result + item['mail-address']
-    return list(set(result))
-
-
-def getAllWebsite(database, source):
-    Orga = Query()
-    result = []
-    for item in database.search(Orga['sourceUrl'].exists()):
-        if source in item['sourceUrl']:
-            if item['website'] != 'not found':
-                result.append(item['website'])
-    return list(set(result))
-
-
-def getAllWithoutWebsite(database, source):
-    Orga = Query()
-    result = []
-    for item in database.search(Orga['sourceUrl'].exists()):
-        if source in item['sourceUrl']:
-            if item['website'] == 'not found':
-                result.append(item['website'])
-    return result
-
-
 def displayAllMail(database):
     print("==============Website       ====================")
-    nbWebsitesAT = len(getAllWebsite(database, 'agendatrad'))
-    nbWebsitesTK = len(getAllWebsite(database, 'tamm-kreiz'))
+    nbWebsitesAT = len(databaseModule.getAllWebsite(database, 'agendatrad'))
+    nbWebsitesTK = len(databaseModule.getAllWebsite(database, 'tamm-kreiz'))
     nombreOrgaSansWebsiteAgendaTrad = len(
-        getAllWithoutWebsite(database, 'agendatrad')
+        databaseModule.getAllWithoutWebsite(database, 'agendatrad')
     )
     nombreOrgaSansWebsitetammkreiz = len(
-        getAllWithoutWebsite(database, 'tamm-kreiz')
+        databaseModule.getAllWithoutWebsite(database, 'tamm-kreiz')
     )
     print('Website from Tamm Kreiz : ' + str(nbWebsitesTK))
     print('Website from AgendaTrad : ' + str(nbWebsitesAT))
@@ -126,8 +46,14 @@ def displayAllMail(database):
     print('Pourcentage de sites total : ' + str(percentageSitesAll))
     print("================================================")
 
-    mailAT = getAllMailFromWebsiteInDatabaseFromSource(database, 'agendatrad')
-    mailTK = getAllMailFromWebsiteInDatabaseFromSource(database, 'tamm-kreiz')
+    mailAT = databaseModule.getAllMailFromWebsiteInDatabaseFromSource(
+        database,
+        'agendatrad'
+    )
+    mailTK = databaseModule.getAllMailFromWebsiteInDatabaseFromSource(
+        database,
+        'tamm-kreiz'
+    )
 
     mailInTkAndInAT = 0
     newMail = 0
@@ -148,8 +74,22 @@ def displayAllMail(database):
     print('Doublons = ' + str(mailInTkAndInAT))
     print('Pourcentage de doublons : ' + str(percentageDoublon))
     print("================================================")
-
-    getAllMailAvailableToSend(mailAT, mailTK,  getOldMailFromMailChimp())
+    newMail = getAllMailAvailableToSend(
+        mailAT,
+        mailTK,
+        getOldMailFromMailChimp()
+    )
+    newOrgaList = databaseModule.getAllOrgaWithNewMail(database, newMail)
+    count = 0
+    f = open("db/emails_result.txt", "w")
+    for item in newOrgaList:
+        for mail in list(set(item['mail-address'])):
+            f.write(item['name'] + " : " + mail + '\n')
+            count = count + 1
+    f.close()
+    print("================================================")
+    print('new mail = '+str(count))
+    print("================================================")
 
 
 def getAllMailAvailableToSend(mailAT, mailTK, OldMail):
@@ -167,7 +107,6 @@ def getAllMailAvailableToSend(mailAT, mailTK, OldMail):
         else:
             newMails.append(item)
 
-    print("================================================")
     print("Emails from Tamm Kreizh : " + str(len(mailTK)))
     print("Doublons from Tamm Kreiz : " + str(doublonsTK))
 
@@ -176,8 +115,8 @@ def getAllMailAvailableToSend(mailAT, mailTK, OldMail):
     print("================================================")
     print("old Mails : " + str(len(OldMail)))
     print("================================================")
-    print(newMails)
     print("New Mails : " + str(len(newMails)))
+    return list(set(newMails))
 
 
 def cleanDB(db):
@@ -189,14 +128,7 @@ def displayHelp():
     print('-removeAll to remove all database')
     print('-rat remove only agenda trad db')
     print('-rtk remove only tamm kreizh db')
-
-
-def insertAllInDb(listeOrga, database):
-    Orga = Query()
-    for organisation in listeOrga:
-        if len(database.search(Orga.name == organisation.getName())) == 0:
-            database.insert(organisation.toDict())
-            organisation.display()
+    print('-getData to print resume of database infos')
 
 
 def getOldMailFromMailChimp():
@@ -223,26 +155,28 @@ def main():
             elif sys.argv[1] == '-removeAll':
                 cleanDB(db)
             elif sys.argv[1] == '-getData':
+                databaseModule.cleanMailDb(Orga)
                 displayAllMail(Orga)
             else:
                 displayHelp()
     else:
         orgaListe = agendaTradModule.parseAgendaTrad(Orga)
-        insertAllInDb(orgaListe, Orga)
+        databaseModule.insertAllInDb(orgaListe, Orga)
 
         print('getting orga list')
         orgaListe = tammKreizhModule.parseTammKreizh(Orga)
 
         print('inserting db')
-        insertAllInDb(orgaListe, Orga)
+        databaseModule.insertAllInDb(orgaListe, Orga)
 
         print('adding links to explore')
-        updateAddingLinksToExplore(Orga)
+        databaseModule.updateAddingLinksToExplore(Orga)
 
         print('adding finded mail in db')
-        updateDatabaseAddingMails(Orga)
+        databaseModule.updateDatabaseAddingMails(Orga)
+        databaseModule.cleanMailDb(Orga)
         displayAllMail(Orga)
-        updateDatabaseAddingMailsFromMailTo(Orga)
+        databaseModule.updateDatabaseAddingMailsFromMailTo(Orga)
         displayAllMail(Orga)
 
 
